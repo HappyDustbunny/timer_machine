@@ -1,0 +1,174 @@
+
+from vpython import *
+
+global key_event
+SLEEP_TIME = 0.00005  # Time between position update
+PI = 3.1415926536
+NUMBER = 0
+CAM_POS = vector(20, 5, 26)
+
+class DayClass:
+    def __init__(self, x_pos, z_pos, number, day_color, week_day):
+        container = box(pos=vector(x_pos, 4, z_pos), length=4, width=1, height=8, opacity=1, color=day_color)
+        daylist = [container]
+        message = text(pos=vector(x_pos, 8, z_pos + 1.05), axis=vector(1, 0, 0), align='center',
+                       text=week_day[0], height=0.3, color=color.yellow)
+        daylist.append(message)
+        mes = text(pos=vector(x_pos - 2, 8, z_pos), axis=vector(0, 0, 1), align='center',
+                   text=week_day[1], height=0.3, color=color.yellow, visible=False)
+        daylist.append(mes)
+        for _ in range(int(random()*5) + 1):
+            appointment = box(pos=vector(x_pos, int(8 - random()*7), z_pos), length=4.05, width=1.05,
+                              height=1.05, opacity=1, color=vector(random(), random(), random()))
+            daylist.append(appointment)
+        self.date = compound(daylist)
+        self.start_pos = vector(x_pos, 4, z_pos)
+        self.folded_pos = vector(4, 4, z_pos)
+        self.number = number
+
+
+def key_pressed(event):
+    """ Capture keyboard interrupt and choose new direction and new orientation """
+    # value = event.key
+    global key_event
+    key_event = event.key
+
+
+def direction():
+    """ Checking key_event value and update direction if key_event is not empty """
+    global key_event
+    key_to_movement = {
+        'a': vector(-4.4, 0, -1.2),
+        'A': vector(-7*4.4, 0, -7*1.2 - 0.4),
+        'd': vector(4.4, 0, 1.2),
+        'D': vector(7*4.4, 0, 7*1.2 + 0.4),
+        'w': vector(0, 0, -5),
+        'W': vector(0, 0, -30),
+        's': vector(0, 0, 5),
+        'S': vector(0, 0, 30),
+        'f': 'Fold',
+    }
+
+    movement = key_to_movement.get(key_event, vector(0, 0, 0))
+    key_event = ''
+    return movement
+
+
+def initialize():
+    """ Setup scene and make a month"""
+
+    month = []
+    x_pos, z_pos = 0, 0
+
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    days_short = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+    for number in range(30):
+        if number % 7 == 0:
+            x_pos += 4.4
+            z_pos += 1.4
+        else:
+            x_pos += 4.4
+            z_pos += 1.2
+        if number % 7 == 5 or number % 7 == 6:
+            day_color = vector(1, 0, 0)  # Saturday and sundays becomes red
+        else:
+            day_color = vector(1, 1, 1)  # All other days becomes white
+        week_day = (days[number % 7], days_short[number % 7])
+
+        day = DayClass(x_pos, z_pos, number, day_color, week_day)
+        month.append(day)
+    return month
+
+
+def move_to(new_pos):
+    """ Move camera position to new_pos """
+
+    movement_vector = new_pos - scene.camera.pos
+    camera_position = scene.camera.pos
+
+    for _ in range(10):
+        camera_position += movement_vector / 10
+        scene.camera.pos = camera_position
+        sleep(SLEEP_TIME)
+
+
+def move_along(movement_vector):
+    """ Move camera positon along movement_vector """
+
+    camera_position = scene.camera.pos
+
+    for _ in range(10):
+        camera_position += movement_vector / 10
+        scene.camera.pos = camera_position
+        sleep(SLEEP_TIME)
+
+
+def fold(month, in_out):
+    global CAM_POS
+    movement_vector = []
+    camera_movement_vector = vector(0, 0, 0)
+    for day in month:
+        movement_vector.append(day.folded_pos - day.start_pos)
+        if NUMBER == day.number:
+            if in_out == 1:
+                camera_movement_vector = vector(-CAM_POS.z/4.4, CAM_POS.y, CAM_POS.x/4.4) - CAM_POS
+            else:
+                camera_movement_vector = vector(-CAM_POS.z*4.4, CAM_POS.y, CAM_POS.x*4.4) - CAM_POS
+    for _ in range(20):
+        sleep(SLEEP_TIME)
+        scene.camera.rotate(angle=-in_out*PI/40, axis=scene.up)
+        scene.camera.pos += in_out*camera_movement_vector/20
+        print('Camera', scene.camera.pos)
+        for number, day in enumerate(month):
+            day.date.pos += in_out*movement_vector[number]/20
+    CAM_POS = scene.camera.pos
+    print('Blip')
+
+
+def choose():
+    global NUMBER
+    global CAM_POS
+    chosen_one = scene.mouse.pick
+    if chosen_one is not None:
+        chosen_one.color = color.red
+        NUMBER = int(chosen_one.pos.x/4.4)
+        scene.center = chosen_one.pos
+        print(scene.center, chosen_one.pos, NUMBER)
+        CAM_POS = scene.camera.pos
+
+
+def main():
+    """ Main loop """
+    global key_event
+    key_event = ''
+    scene.bind('keydown', key_pressed)
+    scene.bind('mousedown', choose)
+
+    in_out = 1
+
+    scene.center = vector(10, 0, 10)
+    month = initialize()
+    move_to(vector(20, 5, 26))
+    scene.autoscale = False
+
+    sphere(pos=vector(10, 0, 10), radius=.2, color=color.yellow)
+    arrow(axis=vector(1, 0, 0))
+    arrow(axis=vector(0, 1, 0))
+    arrow(axis=vector(0, 0, 1))
+
+    movement_vector = vector(0, 0, 0)
+
+    while True:
+        old_movement_vector = movement_vector
+        movement_vector = direction()
+        if movement_vector == 'Fold':
+            fold(month, in_out)
+            in_out *= -1
+        else:
+            if movement_vector != old_movement_vector:
+                move_along(movement_vector)
+
+
+if __name__ == '__main__':
+    main()
