@@ -7,6 +7,7 @@ PI = 3.1415926536
 NUMBER = 0
 CAM_POS = vector(20, 5, 26)
 
+
 class DayClass:
     def __init__(self, x_pos, z_pos, number, day_color, week_day):
         container = box(pos=vector(x_pos, 4, z_pos), length=4, width=1, height=8, opacity=1, color=day_color)
