@@ -2,7 +2,7 @@
 from vpython import *
 
 global key_event
-SLEEP_TIME = 0.00005  # Time between position update
+SLEEP_TIME = 0.00005  # Time between position updates
 PI = 3.1415926536
 NUMBER = 0
 CAM_POS = vector(20, 5, 26)
