@@ -48,6 +48,7 @@ def direction():
         's': vector(0, 0, 5),
         'S': vector(0, 0, 30),
         'f': 'Fold',
+        ' ': 'StdPos',
     }
 
     movement = key_to_movement.get(key_event, vector(0, 0, 0))
@@ -114,17 +115,18 @@ def fold(month, in_out):
         if NUMBER == day.number:
             if in_out == 1:
                 camera_movement_vector = vector(-CAM_POS.z/4.4, CAM_POS.y, CAM_POS.x/4.4) - CAM_POS
+                print('Camera movement in', camera_movement_vector)
             else:
                 camera_movement_vector = vector(-CAM_POS.z*4.4, CAM_POS.y, CAM_POS.x*4.4) - CAM_POS
+                print('Camera movement out', camera_movement_vector)
     for _ in range(20):
         sleep(SLEEP_TIME)
         scene.camera.rotate(angle=-in_out*PI/40, axis=scene.up)
         scene.camera.pos += in_out*camera_movement_vector/20
-        print('Camera', scene.camera.pos)
         for number, day in enumerate(month):
             day.date.pos += in_out*movement_vector[number]/20
     CAM_POS = scene.camera.pos
-    print('Blip')
+    print('Camera', scene.camera.pos, scene.center, NUMBER)
 
 
 def choose():
@@ -142,16 +144,21 @@ def choose():
 def main():
     """ Main loop """
     global key_event
+    global CAM_POS
     key_event = ''
     scene.bind('keydown', key_pressed)
     scene.bind('mousedown', choose)
 
     in_out = 1
 
-    scene.center = vector(10, 0, 10)
+    # scene.center = vector(10, 0, 10)
     month = initialize()
     move_to(vector(20, 5, 26))
+    print(scene.center)
     scene.autoscale = False
+    # scene.center = vector(10, 5, 10)
+    # scene.range = 10
+    print(scene.center)
 
     sphere(pos=vector(10, 0, 10), radius=.2, color=color.yellow)
     arrow(axis=vector(1, 0, 0))
@@ -166,6 +173,12 @@ def main():
         if movement_vector == 'Fold':
             fold(month, in_out)
             in_out *= -1
+        elif movement_vector == 'StdPos':
+            # scene.center = vector(10, 0, 10)
+            scene.forward = vector(0, 0, -1)
+            scene.camera.pos = vector(20, 5, 26)
+            CAM_POS = scene.camera.pos
+            print('Camera zeroed', scene.camera.pos, scene.center)
         else:
             if movement_vector != old_movement_vector:
                 move_along(movement_vector)
