@@ -96,7 +96,7 @@ def move_to(new_pos):
 
 
 def move_along(movement_vector):
-    """ Move camera positon along movement_vector """
+    """ Move camera positon along movement_vector rap """
 
     camera_position = scene.camera.pos
 
