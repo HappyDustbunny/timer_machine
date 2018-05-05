@@ -11,12 +11,12 @@ class DayClass:
     def __init__(self, x_pos, z_pos, number, day_color, week_day):
         container = box(pos=vector(x_pos, 4, z_pos), length=3.5, width=.8, height=8, opacity=1, color=day_color)
         day_list = [container]
-        message = text(pos=vector(x_pos, 8, z_pos + .5), axis=vector(1, 0, 0), align='center',
-                       text=week_day[0], height=0.3, color=norm(day_color - color.blue))
-        day_list.append(message)
-        mes = text(pos=vector(x_pos - 1.75, 8, z_pos), axis=vector(0, 0, 1), align='center',
-                   text=week_day[1], height=0.3, color=norm(day_color - color.blue), visible=False)
-        day_list.append(mes)
+        # message = text(pos=vector(x_pos, 8, z_pos + .5), axis=vector(1, 0, 0), align='center',
+        #                text=week_day[0], height=0.3, color=norm(day_color - color.blue))
+        # day_list.append(message)
+        # mes = text(pos=vector(x_pos - 1.75, 8, z_pos), axis=vector(0, 0, 1), align='center',
+        #            text=week_day[1], height=0.3, color=norm(day_color - color.blue), visible=False)
+        # day_list.append(mes)
         if day_color == color.yellow:
             container.length = 3.7
             container.width = .9
@@ -29,8 +29,8 @@ class DayClass:
                 day_list.append(appointment)
         self.date = compound(day_list)
         self.date.number = number
-        self.start_pos = vector(x_pos, 4, z_pos)
-        self.folded_pos = vector(z_pos, 4, 4)
+        self.start_pos = vector(x_pos - 1, 4, z_pos)
+        self.folded_pos = vector(z_pos + 2, 4, 4)
         self.number = number
 
 
@@ -78,6 +78,8 @@ def direction():
         'W': vector(0, 0, -30),
         's': vector(0, 0, 5),
         'S': vector(0, 0, 30),
+        'm': vector(56, 0, 74.8),
+        'M': vector(-56, 0, -74.8),
         'f': 'Fold',
         ' ': 'StdPos',
     }
@@ -90,13 +92,13 @@ def direction():
 def glide(month, movement_vector):
     """ Moves all days along movement_vector """
     for _ in range(10):
-        sleep(SLEEP_TIME)
+        sleep(SLEEP_TIME * 2)
         for n, day in enumerate(month):
             if n == 0:
                 month[0].date.pos = month[NUMBER + 1].date.pos
                 month[0].date.number = NUMBER
             else:
-                day.date.pos -= movement_vector / 10
+                day.date.pos -= movement_vector / 20
 
 
 def move_camera_to(new_pos):
@@ -133,9 +135,17 @@ def fold(month, in_out):
             if number > 0:
                 day.date.rotate(angle=in_out*PI/40, axis=scene.up)
                 day.date.pos += in_out * movement_vector[number] / 20
+                if 6 < NUMBER < 15 and in_out == -1:
+                    day.date.pos -= vector(26, 0, 7.4) / 20
             if NUMBER == number:
                 month[0].date.rotate(angle=in_out*PI/40, axis=scene.up)
                 month[0].date.pos += in_out * movement_vector[number + 1] / 20
+                if 6 < NUMBER < 15 and in_out == -1:
+                    month[0].date.pos -= vector(26, 0, 7.4) / 20
+    # if 6 < NUMBER < 15 and in_out == -1:
+        # glide(month, vector(52, 0, 14.8))
+    if 14 < NUMBER and in_out == -1:
+        glide(month, -in_out * vector(56, 0, 14 + 0.8))
     print('Fold', FIXED_POS, day.date.pos, month[0].date.pos, NUMBER)
 
 
@@ -165,7 +175,7 @@ def main():
     in_out = 1
     NUMBER = 6
     month = initialize()
-    move_camera_to(vector(20, 5, 26))
+    move_camera_to(vector(18, 5, 26))
     scene.autoscale = False
     print(scene.center)
 
@@ -185,7 +195,7 @@ def main():
         elif movement_vector == 'StdPos':
             # scene.center = vector(10, 0, 10)
             scene.forward = vector(0, 0, -1)
-            scene.camera.pos = vector(20, 5, 26)
+            scene.camera.pos = vector(18, 5, 26)
             print('Camera zeroed', scene.camera.pos, scene.center)
         elif movement_vector != old_movement_vector:
             glide(month, movement_vector)
