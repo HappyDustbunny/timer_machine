@@ -10,11 +10,6 @@ FIXED_POS = vector(28, 4, 7)
 class DayClass:
     def __init__(self, x_pos, z_pos, number, day_color, week_day):
         container = box(pos=vector(x_pos, 4, z_pos), length=3.5, width=.8, height=8, opacity=1, color=day_color)
-        if day_color == color.yellow:
-            container.length = 3.7
-            container.width = .9
-            container.height = 8.2
-            container.opacity = .3
         day_list = [container]
         message = text(pos=vector(x_pos, 8, z_pos + .5), axis=vector(1, 0, 0), align='center',
                        text=week_day[0], height=0.3, color=norm(day_color - color.blue))
@@ -22,10 +17,16 @@ class DayClass:
         mes = text(pos=vector(x_pos - 1.75, 8, z_pos), axis=vector(0, 0, 1), align='center',
                    text=week_day[1], height=0.3, color=norm(day_color - color.blue), visible=False)
         day_list.append(mes)
-        for _ in range(int(random()*5) + 1):
-            appointment = box(pos=vector(x_pos, int(8 - random()*7), z_pos), length=3.55, width=.85,
-                              height=.95, opacity=1, color=vector(random(), random(), random()))
-            day_list.append(appointment)
+        if day_color == color.yellow:
+            container.length = 3.7
+            container.width = .9
+            container.height = 8.2
+            container.opacity = .3
+        else:
+            for _ in range(int(random()*5) + 1):
+                appointment = box(pos=vector(x_pos, int(8 - random()*7), z_pos), length=3.55, width=.85,
+                                  height=.95, opacity=1, color=vector(random(), random(), random()))
+                day_list.append(appointment)
         self.date = compound(day_list)
         self.date.number = number
         self.start_pos = vector(x_pos, 4, z_pos)
@@ -61,7 +62,6 @@ def initialize():
         day.date.pos = day.start_pos
         month.append(day)
     marked_day = DayClass(month[NUMBER].date.pos.x, month[NUMBER].date.pos.z, NUMBER, color.yellow, ('Bzz', 'Rap'))
-    marked_day.date.pos = marked_day.start_pos
     month.insert(0, marked_day)
     return month
 
@@ -88,6 +88,7 @@ def direction():
 
 
 def glide(month, movement_vector):
+    """ Moves all days along movement_vector """
     for _ in range(10):
         sleep(SLEEP_TIME)
         for n, day in enumerate(month):
@@ -98,12 +99,10 @@ def glide(month, movement_vector):
                 day.date.pos -= movement_vector / 10
 
 
-def move_to(new_pos):
+def move_camera_to(new_pos):
     """ Move camera position to new_pos """
-
     movement_vector = new_pos - scene.camera.pos
     camera_position = scene.camera.pos
-
     for _ in range(10):
         camera_position += movement_vector / 10
         scene.camera.pos = camera_position
@@ -122,11 +121,12 @@ def move_along(movement_vector):
 
 
 def fold(month, in_out):
+    """ Fold the calendar in and out """
     global NUMBER
     global FIXED_POS
     movement_vector = []
     for day in month:
-        movement_vector.append(day.folded_pos - day.start_pos) # + vector(FIXED_POS.x, 0, FIXED_POS.z))
+        movement_vector.append(day.folded_pos - day.start_pos)  # Works.
     for _ in range(20):
         sleep(SLEEP_TIME)
         for number, day in enumerate(month):
@@ -136,10 +136,11 @@ def fold(month, in_out):
             if NUMBER == number:
                 month[0].date.rotate(angle=in_out*PI/40, axis=scene.up)
                 month[0].date.pos += in_out * movement_vector[number + 1] / 20
-                print('Fold', day.date.pos, month[0].date.pos, NUMBER)
+    print('Fold', FIXED_POS, day.date.pos, month[0].date.pos, NUMBER)
 
 
 def choose():
+    """ Pick a date by pointing and clicking"""
     global NUMBER
     global FIXED_POS
     chosen_one = scene.mouse.pick
@@ -147,6 +148,7 @@ def choose():
         NUMBER = chosen_one.number
         FIXED_POS = chosen_one.pos
         print('chosen_one.pos, NUMBER', chosen_one.pos, NUMBER)
+# TODO center chosen day right after it is picked
 
 
 def main():
@@ -163,7 +165,7 @@ def main():
     in_out = 1
     NUMBER = 6
     month = initialize()
-    move_to(vector(20, 5, 26))
+    move_camera_to(vector(20, 5, 26))
     scene.autoscale = False
     print(scene.center)
 
