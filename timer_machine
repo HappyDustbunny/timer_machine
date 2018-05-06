@@ -4,7 +4,6 @@ from vpython import *
 SLEEP_TIME = 0.00005  # Time between position updates
 PI = 3.1415926536
 NUMBER = 0
-FIXED_POS = vector(28, 4, 7)
 
 
 class DayClass:
@@ -71,9 +70,9 @@ def direction():
     global key_event
     key_to_movement = {
         'a': vector(-4, 0, -1),
-        'A': vector(-7*4, 0, -7*1 - 0.4),
+        'A': vector(-28, 0, -7.4),
         'd': vector(4, 0, 1),
-        'D': vector(7*4, 0, 7*1 + 0.4),
+        'D': vector(28, 0, 7.4),
         'w': vector(0, 0, -5),
         'W': vector(0, 0, -30),
         's': vector(0, 0, 5),
@@ -96,7 +95,6 @@ def glide(month, movement_vector):
         for n, day in enumerate(month):
             if n == 0:
                 month[0].date.pos = month[NUMBER + 1].date.pos
-                month[0].date.number = NUMBER
             else:
                 day.date.pos -= movement_vector / 20
 
@@ -110,22 +108,21 @@ def move_camera_to(new_pos):
         scene.camera.pos = camera_position
         sleep(SLEEP_TIME)
 
-
-def move_along(movement_vector):
-    """ Move camera positon along movement_vector rap """
-
-    camera_position = scene.camera.pos
-
-    for _ in range(10):
-        camera_position += movement_vector / 10
-        scene.camera.pos = camera_position
-        sleep(SLEEP_TIME)
+#
+# def move_along(movement_vector):
+#     """ Move camera positon along movement_vector rap """
+#
+#     camera_position = scene.camera.pos
+#
+#     for _ in range(10):
+#         camera_position += movement_vector / 10
+#         scene.camera.pos = camera_position
+#         sleep(SLEEP_TIME)
 
 
 def fold(month, in_out):
     """ Fold the calendar in and out """
     global NUMBER
-    global FIXED_POS
     movement_vector = []
     for day in month:
         movement_vector.append(day.folded_pos - day.start_pos)  # Works.
@@ -135,37 +132,33 @@ def fold(month, in_out):
             if number > 0:
                 day.date.rotate(angle=in_out*PI/40, axis=scene.up)
                 day.date.pos += in_out * movement_vector[number] / 20
-                if 6 < NUMBER < 15 and in_out == -1:
+                if 6 < NUMBER < 14 and in_out == -1:
                     day.date.pos -= vector(26, 0, 7.4) / 20
+                if 13 < NUMBER < 21 and in_out == -1:
+                    day.date.pos -= vector(56, 0, 14.8) / 20
             if NUMBER == number:
                 month[0].date.rotate(angle=in_out*PI/40, axis=scene.up)
                 month[0].date.pos += in_out * movement_vector[number + 1] / 20
-                if 6 < NUMBER < 15 and in_out == -1:
-                    month[0].date.pos -= vector(26, 0, 7.4) / 20
-    # if 6 < NUMBER < 15 and in_out == -1:
-        # glide(month, vector(52, 0, 14.8))
-    if 14 < NUMBER and in_out == -1:
-        glide(month, -in_out * vector(56, 0, 14 + 0.8))
-    print('Fold', FIXED_POS, day.date.pos, month[0].date.pos, NUMBER)
+                if 6 < NUMBER < 14 and in_out == -1:
+                    month[0].date.pos -= vector(28, 0, 7.4) / 20
+                if 13 < NUMBER < 21 and in_out == -1:
+                    month[0].date.pos -= vector(56, 0, 14.8) / 20
+    print('Fold', day.date.pos, month[0].date.pos, NUMBER)
 
 
 def choose():
     """ Pick a date by pointing and clicking"""
     global NUMBER
-    global FIXED_POS
     chosen_one = scene.mouse.pick
     if chosen_one is not None:
         NUMBER = chosen_one.number
-        FIXED_POS = chosen_one.pos
         print('chosen_one.pos, NUMBER', chosen_one.pos, NUMBER)
-# TODO center chosen day right after it is picked
 
 
 def main():
     """ Main loop """
     global key_event
     global NUMBER
-    global FIXED_POS
     key_event = ''
     scene.bind('keydown', key_pressed)
     scene.bind('mousedown', choose)
