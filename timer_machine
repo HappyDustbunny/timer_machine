@@ -132,17 +132,21 @@ def fold(month, in_out):
             if number > 0:
                 day.date.rotate(angle=in_out*PI/40, axis=scene.up)
                 day.date.pos += in_out * movement_vector[number] / 20
-                if 6 < NUMBER < 14 and in_out == -1:
-                    day.date.pos -= vector(26, 0, 7.4) / 20
-                if 13 < NUMBER < 21 and in_out == -1:
-                    day.date.pos -= vector(56, 0, 14.8) / 20
+                if 6 < NUMBER < 14:
+                    day.date.pos += in_out * vector(26, 0, 7.4) / 20
+                if 13 < NUMBER < 21:
+                    day.date.pos += in_out * vector(56, 0, 14.8) / 20
+                if 20 < NUMBER:
+                    day.date.pos += in_out * vector(86, 0, 22.4) / 20
             if NUMBER == number:
                 month[0].date.rotate(angle=in_out*PI/40, axis=scene.up)
                 month[0].date.pos += in_out * movement_vector[number + 1] / 20
-                if 6 < NUMBER < 14 and in_out == -1:
-                    month[0].date.pos -= vector(28, 0, 7.4) / 20
-                if 13 < NUMBER < 21 and in_out == -1:
-                    month[0].date.pos -= vector(56, 0, 14.8) / 20
+                if 6 < NUMBER < 14:
+                    month[0].date.pos += in_out * vector(28, 0, 7.4) / 20
+                if 13 < NUMBER < 21:
+                    month[0].date.pos += in_out * vector(56, 0, 14.8) / 20
+                if 20 < NUMBER:
+                    month[0].date.pos += in_out * vector(86, 0, 22.4) / 20
     print('Fold', day.date.pos, month[0].date.pos, NUMBER)
 
 
@@ -167,6 +171,7 @@ def main():
 
     in_out = 1
     NUMBER = 6
+    old_number = NUMBER
     month = initialize()
     move_camera_to(vector(18, 5, 26))
     scene.autoscale = False
@@ -186,13 +191,22 @@ def main():
             fold(month, in_out)
             in_out *= -1
         elif movement_vector == 'StdPos':
-            # scene.center = vector(10, 0, 10)
             scene.forward = vector(0, 0, -1)
             scene.camera.pos = vector(18, 5, 26)
             print('Camera zeroed', scene.camera.pos, scene.center)
-        elif movement_vector != old_movement_vector:
+        elif movement_vector != old_movement_vector:   # Strange. Looks like it evaluates <0,0,0> != <0,0,0> as True
             glide(month, movement_vector)
-
+        if old_number != NUMBER:
+            movement_vector = vector(0, 0, 0)
+            if 6 < NUMBER < 14:
+                movement_vector = vector(26, 0, 7.4)
+            if 13 < NUMBER < 21:
+                movement_vector = vector(56, 0, 14.8)
+            if 20 < NUMBER:
+                movement_vector = vector(86, 0, 22.4)
+            glide(month, movement_vector)
+            old_number = NUMBER
+#ToDo Line 199-208 should center week if a day are clicked. It works to a first approximation
 
 if __name__ == '__main__':
     main()
