@@ -9,12 +9,12 @@ class DayClass:
     def __init__(self, x_pos, z_pos, number, day_color, week_day):
         container = box(pos=vector(x_pos, 4, z_pos), length=3.5, width=.8, height=8, opacity=1, color=day_color)
         day_list = [container]
-        # message = text(pos=vector(x_pos, 8, z_pos + .5), axis=vector(1, 0, 0), align='center',
-        #                text=week_day[0], height=0.3, color=norm(day_color - color.blue))
-        # day_list.append(message)
-        # mes = text(pos=vector(x_pos - 1.75, 8, z_pos), axis=vector(0, 0, 1), align='center',
-        #            text=week_day[1], height=0.3, color=norm(day_color - color.blue), visible=False)
-        # day_list.append(mes)
+        message = text(pos=vector(x_pos, 8, z_pos + .5), axis=vector(1, 0, 0), align='center',
+                       text=week_day[0], height=0.3, color=norm(day_color - color.blue))
+        day_list.append(message)
+        mes = text(pos=vector(x_pos - 1.75, 8, z_pos), axis=vector(0, 0, 1), align='center',
+                   text=week_day[1], height=0.3, color=norm(day_color - color.blue), visible=False)
+        day_list.append(mes)
         if day_color == color.yellow:
             container.length = 3.7
             container.width = .9
@@ -59,7 +59,7 @@ def initialize():
         day = DayClass(x_pos, z_pos, number, day_color, week_day)
         day.date.pos = day.start_pos
         month.append(day)
-    marked_day = DayClass(month[NUMBER].date.pos.x, month[NUMBER].date.pos.z, NUMBER, color.yellow, ('Bzz', 'Rap'))
+    marked_day = DayClass(month[NUMBER].date.pos.x, month[NUMBER].date.pos.z, NUMBER, color.yellow, ('.', '.'))
     month.insert(0, marked_day)
     return month
 
