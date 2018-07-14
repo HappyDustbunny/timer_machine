@@ -1,4 +1,3 @@
-
 from vpython import *
 
 SLEEP_TIME = 0.00005  # Time between position updates
@@ -22,8 +21,8 @@ class DayClass:
             container.height = 8.2
             container.opacity = .3
         else:
-            for _ in range(int(random()*5) + 1):
-                appointment = box(pos=vector(x_pos, int(8 - random()*7), z_pos), length=3.55, width=.85,
+            for _ in range(int(random() * 5) + 1):
+                appointment = box(pos=vector(x_pos, int(8 - random() * 7), z_pos), length=3.55, width=.85,
                                   height=.95, opacity=1, color=vector(random(), random(), random()))
                 day_list.append(appointment)
         self.date = compound(day_list)
@@ -108,6 +107,7 @@ def move_camera_to(new_pos):
         scene.camera.pos = camera_position
         sleep(SLEEP_TIME)
 
+
 #
 # def move_along(movement_vector):
 #     """ Move camera positon along movement_vector rap """
@@ -130,7 +130,7 @@ def fold(month, in_out):
         sleep(SLEEP_TIME)
         for number, day in enumerate(month):
             if number > 0:
-                day.date.rotate(angle=in_out*PI/40, axis=scene.up)
+                day.date.rotate(angle=in_out * PI / 40, axis=scene.up)
                 day.date.pos += in_out * movement_vector[number] / 20
                 if 6 < NUMBER < 14:
                     day.date.pos += in_out * vector(26, 0, 7.4) / 20
@@ -139,7 +139,7 @@ def fold(month, in_out):
                 if 20 < NUMBER:
                     day.date.pos += in_out * vector(86, 0, 22.4) / 20
             if NUMBER == number:
-                month[0].date.rotate(angle=in_out*PI/40, axis=scene.up)
+                month[0].date.rotate(angle=in_out * PI / 40, axis=scene.up)
                 month[0].date.pos += in_out * movement_vector[number + 1] / 20
                 if 6 < NUMBER < 14:
                     month[0].date.pos += in_out * vector(28, 0, 7.4) / 20
@@ -194,9 +194,9 @@ def main():
             scene.forward = vector(0, 0, -1)
             scene.camera.pos = vector(18, 5, 26)
             print('Camera zeroed', scene.camera.pos, scene.center)
-        elif movement_vector != old_movement_vector:   # Strange. Looks like it evaluates <0,0,0> != <0,0,0> as True
+        elif movement_vector != old_movement_vector:  # Strange. Looks like it evaluates <0,0,0> != <0,0,0> as True
             glide(month, movement_vector)
-        if old_number != NUMBER:
+        if old_number != NUMBER and in_out == 1:
             movement_vector = vector(0, 0, 0)
             if 6 < NUMBER < 14:
                 movement_vector = vector(26, 0, 7.4)
@@ -205,8 +205,9 @@ def main():
             if 20 < NUMBER:
                 movement_vector = vector(86, 0, 22.4)
             glide(month, movement_vector)
-            old_number = NUMBER
-#ToDo Line 199-208 should center week if a day are clicked. It works to a first approximation
+        old_number = NUMBER
+        movement_vector = vector(0, 0, 0)
+
 
 if __name__ == '__main__':
     main()
