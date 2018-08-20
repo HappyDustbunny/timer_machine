@@ -1,5 +1,5 @@
 languages:
 - python
 exclude:
-- //.idea/.*
+- /idea/.*
 - /Venv/.*
